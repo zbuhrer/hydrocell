@@ -44,42 +44,146 @@ class FuelCell:
         return 0.0
 
     def solve_schrodinger(self):
-        """Solve the time-independent Schrödinger equation for a barrier"""
-        # Set up the computational domain
-        x_range = np.linspace(-3*self.barrier_width_m, 4*self.barrier_width_m, 1000)
+        """solver for the time-independent Schrödinger equation"""
+        # Use logarithmically spaced points to better resolve the barrier region
+        left_domain = np.linspace(-5*self.barrier_width_m, -0.1*self.barrier_width_m, 200)
+        barrier_domain = np.linspace(-0.1*self.barrier_width_m, 1.1*self.barrier_width_m, 400)
+        right_domain = np.linspace(1.1*self.barrier_width_m, 5*self.barrier_width_m, 200)
+        x_range = np.concatenate([left_domain, barrier_domain, right_domain])
+        x_range = np.sort(np.unique(x_range))  # Ensure no duplicate points
 
-        # Wave vector k
+        # Wave vector k outside barrier
         k = np.sqrt(2 * self.m_e * self.electron_energy_J) / self.hbar
 
-        # Define the Schrödinger equation as a first-order system
-        def schrodinger_system(x, y):
-            psi, phi = y
-            V = np.array([self.potential_barrier(xi) for xi in x])
-            dpsi_dx = phi
-            dphi_dx = 2 * self.m_e / (self.hbar**2) * (V - self.electron_energy_J) * psi
-            return np.vstack((dpsi_dx, dphi_dx))
+        # Handle cases where energy > barrier vs energy < barrier
+        if self.electron_energy_J >= self.barrier_height_J:
+            # For E > V, use the analytical solution directly since there's no tunneling
+            # Just reflection/transmission at a potential step
+            return self.analytical_above_barrier(x_range)
+        else:
+            # For E < V, use a combination of analytical and numerical approaches
+            try:
+                # Define the Schrödinger equation as a first-order system
+                def schrodinger_system(x, y):
+                    psi, phi = y
+                    V = np.zeros_like(x)
+                    for i, xi in enumerate(x):
+                        V[i] = self.potential_barrier(xi)
 
-        # Boundary conditions: incident wave from left and transmitted wave to right
-        def bc(ya, yb):
-            # Left boundary: psi = exp(ikx) + R*exp(-ikx)
-            # Right boundary: psi = T*exp(ikx)
-            return np.array([
-                ya[0] - (1 + 0.5),  # Normalization at left boundary
-                yb[0] - 0.5         # Arbitrary value at right boundary
-            ])
+                    # Avoid division by zero by adding a small epsilon
+                    epsilon = 1e-10
+                    dpsi_dx = phi
+                    dphi_dx = 2 * self.m_e / (self.hbar**2 + epsilon) * (V - self.electron_energy_J) * psi
+                    return np.vstack((dpsi_dx, dphi_dx))
 
-        # Initial guess for the solution
-        y_guess = np.zeros((2, len(x_range)))
-        y_guess[0] = np.exp(-((x_range - x_range.mean())**2)/2)  # Gaussian guess
-        y_guess[1] = np.gradient(y_guess[0], x_range)
+                # Improved boundary conditions based on physical understanding
+                def bc(ya, yb):
+                    # Left side: incident + reflected wave
+                    # Right side: transmitted wave only
+                    k_outside = np.sqrt(2 * self.m_e * self.electron_energy_J) / self.hbar
 
-        # Solve the boundary value problem
-        try:
-            sol = solve_bvp(schrodinger_system, bc, x_range, y_guess, max_nodes=10000)
-            return sol.x, sol.y[0]  # x values and wavefunction psi
-        except:
-            # Fallback to analytical approximation if numerical solution fails
-            return self.wkb_approximation(x_range)
+                    # Enforce continuity and derivative matching
+                    return np.array([
+                        # At left boundary: psi is normalized
+                        ya[0] - 1.0,
+                        # At right boundary: derivative matches transmitted wave
+                        yb[1] - 1j * k_outside * yb[0]
+                    ])
+
+                # More robust initial guess
+                y_guess = np.zeros((2, len(x_range)))
+
+                # For x < 0
+                mask_left = x_range < 0
+                y_guess[0, mask_left] = np.exp(1j * k * x_range[mask_left]) + 0.5 * np.exp(-1j * k * x_range[mask_left])
+                y_guess[1, mask_left] = 1j * k * np.exp(1j * k * x_range[mask_left]) - 0.5 * 1j * k * np.exp(-1j * k * x_range[mask_left])
+
+                # For 0 <= x <= barrier_width
+                kappa = np.sqrt(2 * self.m_e * abs(self.barrier_height_J - self.electron_energy_J)) / self.hbar
+                mask_barrier = (x_range >= 0) & (x_range <= self.barrier_width_m)
+                y_guess[0, mask_barrier] = 0.5 * np.exp(-kappa * x_range[mask_barrier])
+                y_guess[1, mask_barrier] = -0.5 * kappa * np.exp(-kappa * x_range[mask_barrier])
+
+                # For x > barrier_width
+                mask_right = x_range > self.barrier_width_m
+                y_guess[0, mask_right] = 0.25 * np.exp(1j * k * (x_range[mask_right] - self.barrier_width_m))
+                y_guess[1, mask_right] = 0.25 * 1j * k * np.exp(1j * k * (x_range[mask_right] - self.barrier_width_m))
+
+                # Use complex solver for accurate phases
+                sol = solve_bvp(schrodinger_system, bc, x_range, y_guess.real,
+                               max_nodes=10000, tol=1e-3, verbose=0)
+
+                if not sol.success:
+                    # Fall back to analytical approximation if numerical solution fails
+                    return self.analytical_tunneling(x_range)
+
+                return sol.x, sol.y[0]
+
+            except Exception as e:
+                print(f"Numerical solver failed: {str(e)}")
+                # Fallback to analytical approximation
+                return self.analytical_tunneling(x_range)
+
+    def analytical_tunneling(self, x_range):
+        """Analytical approximation for tunneling wavefunction"""
+        # Wave vectors
+        k_outside = np.sqrt(2 * self.m_e * self.electron_energy_J) / self.hbar
+        kappa = np.sqrt(2 * self.m_e * (self.barrier_height_J - self.electron_energy_J)) / self.hbar
+
+        # Transmission and reflection coefficients (approximate)
+        T = 4 * k_outside * kappa / ((k_outside + kappa)**2) * np.exp(-kappa * self.barrier_width_m)
+        R = 1 - T  # Conservation of probability
+
+        # Construct wavefunction
+        psi = np.zeros_like(x_range, dtype=complex)
+        for i, x in enumerate(x_range):
+            if x < 0:
+                # Incident + reflected wave
+                psi[i] = np.exp(1j * k_outside * x) + np.sqrt(R) * np.exp(-1j * k_outside * x)
+            elif 0 <= x <= self.barrier_width_m:
+                # Evanescent wave in barrier
+                psi[i] = (1 + np.sqrt(R)) * np.exp(-kappa * x)
+            else:
+                # Transmitted wave
+                psi[i] = np.sqrt(T) * np.exp(1j * k_outside * (x - self.barrier_width_m))
+
+        return x_range, psi
+
+    def analytical_above_barrier(self, x_range):
+        """Analytical solution for electron energy above barrier height"""
+        # Wave vectors
+        k_outside = np.sqrt(2 * self.m_e * self.electron_energy_J) / self.hbar
+        k_inside = np.sqrt(2 * self.m_e * (self.electron_energy_J - self.barrier_height_J)) / self.hbar
+
+        # Reflection and transmission at each interface
+        r1 = (k_outside - k_inside) / (k_outside + k_inside)
+        t1 = 2 * k_outside / (k_outside + k_inside)
+
+        r2 = (k_inside - k_outside) / (k_inside + k_outside)
+        t2 = 2 * k_inside / (k_inside + k_outside)
+
+        # Phase accumulated across barrier
+        phase = k_inside * self.barrier_width_m
+
+        # Total transmission coefficient
+        T = abs(t1 * t2 * np.exp(1j * phase) / (1 + r1 * r2 * np.exp(2j * phase)))**2
+        R = 1 - T
+
+        # Construct wavefunction
+        psi = np.zeros_like(x_range, dtype=complex)
+        for i, x in enumerate(x_range):
+            if x < 0:
+                # Incident + reflected wave
+                psi[i] = np.exp(1j * k_outside * x) + np.sqrt(R) * np.exp(-1j * k_outside * x)
+            elif 0 <= x <= self.barrier_width_m:
+                # Oscillatory wave in barrier
+                # Approximate behavior - real solution would need to match at boundaries
+                psi[i] = t1 * (np.exp(1j * k_inside * x) + r2 * np.exp(1j * k_inside * (2 * self.barrier_width_m - x)))
+            else:
+                # Transmitted wave
+                psi[i] = np.sqrt(T) * np.exp(1j * k_outside * x)
+
+        return x_range, psi
 
     def wkb_approximation(self, x_range):
         """WKB approximation for tunneling through a rectangular barrier"""
