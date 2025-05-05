@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <style>
+    text {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .subtitle {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .axis-label {
+      font-size: 14px;
+    }
+    .value-label {
+      font-size: 12px;
+    }
+    .temperature-label {
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    @keyframes energyFluctuation {
+      0% { transform: translateY(0px); }
+      25% { transform: translateY(-5px); }
+      50% { transform: translateY(0px); }
+      75% { transform: translateY(5px); }
+      100% { transform: translateY(0px); }
+    }
+    .energy-fluctuation {
+      animation: energyFluctuation 3s ease-in-out infinite;
+    }
+    
+    @keyframes pulseOpacity {
+      0% { opacity: 0.3; }
+      50% { opacity: 0.7; }
+      100% { opacity: 0.3; }
+    }
+    .pulse {
+      animation: pulseOpacity 2s ease-in-out infinite;
+    }
+  </style>
+  
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">Temperature Effects on Quantum Tunneling</text>
+  
+  <!-- Left visualization: Temperature effects on barrier -->
+  <g transform="translate(50, 80)">
+    <text x="175" y="-20" text-anchor="middle" class="subtitle">Barrier Modification at Different Temperatures</text>
+    
+    <!-- Axes -->
+    <line x1="0" y1="300" x2="350" y2="300" stroke="black" stroke-width="1.5"/>
+    <line x1="0" y1="50" x2="0" y2="300" stroke="black" stroke-width="1.5"/>
+    
+    <!-- Axis labels -->
+    <text x="175" y="330" text-anchor="middle" class="axis-label">Position (nm)</text>
+    <text x="-35" y="175" text-anchor="middle" transform="rotate(-90, -35, 175)" class="axis-label">Energy (eV)</text>
+    
+    <!-- Cold temperature (273K) -->
+    <rect x="100" y="60" width="150" height="240" fill="#0099ff" fill-opacity="0.3" stroke="#0066cc" stroke-width="2"/>
+    <text x="175" y="70" text-anchor="middle" class="temperature-label" fill="#0066cc">273 K</text>
+    <line x1="0" y1="200" x2="350" y2="200" stroke="#339933" stroke-width="2" stroke-dasharray="5,3"/>
+    <text x="20" y="195" class="value-label" fill="#339933">E</text>
+    
+    <!-- Room temperature (298K) -->
+    <rect x="100" y="80" width="150" height="220" fill="#66cc66" fill-opacity="0.3" stroke="#339933" stroke-width="2"/>
+    <text x="175" y="90" text-anchor="middle" class="temperature-label" fill="#339933">298 K</text>
+    <line x1="0" y1="190" x2="350" y2="190" stroke="#66cc66" stroke-width="2" stroke-dasharray="5,3"/>
+    <text x="20" y="185" class="value-label" fill="#66cc66">E</text>
+    
+    <!-- Hot temperature (323K) -->
+    <rect x="100" y="100" width="150" height="200" fill="#ff6666" fill-opacity="0.3" stroke="#cc3333" stroke-width="2"/>
+    <text x="175" y="110" text-anchor="middle" class="temperature-label" fill="#cc3333">323 K</text>
+    <line x1="0" y1="180" x2="350" y2="180" stroke="#cc3333" stroke-width="2" stroke-dasharray="5,3"/>
+    <text x="20" y="175" class="value-label" fill="#cc3333">E</text>
+    
+    <!-- Energy distribution -->
+    <g class="energy-fluctuation">
+      <!-- Cold temperature (narrow distribution) -->
+      <path d="M 360,200 Q 370,195 380,200 Q 390,205 400,200" 
+            fill="none" stroke="#0066cc" stroke-width="2"/>
+      
+      <!-- Room temperature (medium distribution) -->
+      <path d="M 360,190 Q 370,170 380,190 Q 390,210 400,190" 
+            fill="none" stroke="#339933" stroke-width="2"/>
+      
+      <!-- Hot temperature (broad distribution) -->
+      <path d="M 360,180 Q 370,150 380,180 Q 390,210 400,180" 
+            fill="none" stroke="#cc3333" stroke-width="2"/>
+    </g>
+    
+    <!-- Barrier modification formula -->
+    <text x="175" y="350" text-anchor="middle" class="value-label">barrier_modification = exp(-0.03 * (T - 298.15) / 298.15)</text>
+  </g>
+  
+  <!-- Right visualization: Temperature broadening -->
+  <g transform="translate(420, 80)">
+    <text x="175" y="-20" text-anchor="middle" class="subtitle">Energy Distribution at Different Temperatures</text>
+    
+    <!-- Axes -->
+    <line x1="50" y1="300" x2="350" y2="300" stroke="black" stroke-width="1.5"/>
+    <line x1="50" y1="50" x2="50" y2="300" stroke="black" stroke-width="1.5"/>
+    
+    <!-- Axis labels -->
+    <text x="200" y="330" text-anchor="middle" class="axis-label">Energy (eV)</text>
+    <text x="15" y="175" text-anchor="middle" transform="rotate(-90, 15, 175)" class="axis-label">Probability Density</text>
+    
+    <!-- Energy labels -->
+    <text x="100" y="320" text-anchor="middle" class="value-label">1.8</text>
+    <text x="200" y="320" text-anchor="middle" class="value-label">2.8</text>
+    <text x="300" y="320" text-anchor="middle" class="value-label">3.8</text>
+    
+    <!-- Electron energy marker -->
+    <line x1="200" y1="300" x2="200" y2="50" stroke="#666666" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="200" y="45" text-anchor="middle" class="value-label">E = 2.8 eV</text>
+    
+    <!-- Cold energy distribution (273K) - narrow -->
+    <path d="M 80,290 Q 130,270 200,100 Q 270,270 320,290" 
+          fill="#0099ff" fill-opacity="0.2" stroke="#0066cc" stroke-width="2"/>
+    <text x="85" y="260" class="temperature-label" fill="#0066cc">273 K</text>
+    
+    <!-- Room temperature distribution (298K) - medium -->
+    <path d="M 70,290 Q 130,250 200,120 Q 270,250 330,290" 
+          fill="#66cc66" fill-opacity="0.2" stroke="#339933" stroke-width="2"/>
+    <text x="85" y="240" class="temperature-label" fill="#339933">298 K</text>
+    
+    <!-- Hot temperature distribution (323K) - wide -->
+    <path d="M 60,290 Q 130,230 200,140 Q 270,230 340,290" 
+          fill="#ff6666" fill-opacity="0.2" stroke="#cc3333" stroke-width="2"/>
+    <text x="85" y="220" class="temperature-label" fill="#cc3333">323 K</text>
+    
+    <!-- Barrier region -->
+    <rect x="250" y="50" width="80" height="250" fill="#666666" fill-opacity="0.1" stroke="none"/>
+    <text x="290" y="65" class="value-label">Barrier Region</text>
+    
+    <!-- Temperature broadening formula -->
+    <text x="175" y="350" text-anchor="middle" class="value-label">temp_factor = 1.0 + 0.01 * (T - 298.15)</text>
+  </g>
+  
+  <!-- Bottom section: Combined effect visualization -->
+  <g transform="translate(220, 415)">
+    <text x="180" y="0" text-anchor="middle" class="value-label">quantum_factor = 0.1 + 0.9 * tunneling_prob * hydration_factor</text>
+    
+    <g class="pulse">
+      <path d="M 80,0 L 110,-10 L 140,10 L 170,-5 L 200,5 L 230,-10 L 260,0" 
+            fill="none" stroke="#9933cc" stroke-width="3"/>
+      <text x="300" y="5" class="value-label">Combined quantum enhancement</text>
+    </g>
+  </g>
+</svg>

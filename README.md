@@ -52,7 +52,11 @@ $$T \approx \exp\left(-2\kappa L\right)$$
 
 where $\kappa = \sqrt{\frac{2m(V_0-E)}{\hbar^2}}$ is the decay constant within the barrier. This formula highlights the strong dependence of tunneling on barrier width ($L$), barrier height ($V_0$), and electron energy ($E$).
 
-![](hcell_qtunneling.svg)
+![Quantum tunneling effects across the proton membrane in a hydrogen fuel cell](hcell_qtunneling.svg)
+
+![Different shaped proton membranes](hcell_barriershapes.svg)
+
+![Temperature effects on proton tunneling](hcell_tempeffects.svg)
 
 ## Realistic Membrane Modeling
 
