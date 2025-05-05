@@ -52,6 +52,8 @@ $$T \approx \exp\left(-2\kappa L\right)$$
 
 where $\kappa = \sqrt{\frac{2m(V_0-E)}{\hbar^2}}$ is the decay constant within the barrier. This formula highlights the strong dependence of tunneling on barrier width ($L$), barrier height ($V_0$), and electron energy ($E$).
 
+![](hcell_qtunneling.svg)
+
 ## Realistic Membrane Modeling
 
 The `EnhancedFuelCell` class extends the basic model to incorporate more realistic physical phenomena:

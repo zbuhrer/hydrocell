@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <style>
+    text {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .axis-label {
+      font-size: 16px;
+    }
+    .energy-label {
+      font-size: 12px;
+    }
+    .formula {
+      font-style: italic;
+      font-size: 14px;
+    }
+    @keyframes wave {
+      0% { transform: translateX(0px); }
+      100% { transform: translateX(40px); }
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    #incident {
+      animation: wave 3s linear infinite;
+    }
+    #barrier-wave {
+      animation: wave 3s linear infinite;
+    }
+    #transmitted {
+      animation: wave 3s linear infinite;
+    }
+    .equation {
+      animation: fadeIn 1s ease-in;
+    }
+  </style>
+  
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">Quantum Tunneling in Hydrogen Fuel Cells</text>
+  
+  <!-- Coordinate system -->
+  <g transform="translate(50, 350)">
+    <!-- X-axis -->
+    <line x1="0" y1="0" x2="700" y2="0" stroke="black" stroke-width="2"/>
+    <text x="350" y="40" text-anchor="middle" class="axis-label">Position (x)</text>
+    
+    <!-- Y-axis -->
+    <line x1="0" y1="0" x2="0" y2="-300" stroke="black" stroke-width="2"/>
+    <text x="-40" y="-150" text-anchor="middle" transform="rotate(-90, -40, -150)" class="axis-label">Energy / Amplitude</text>
+    
+    <!-- Potential barrier -->
+    <rect x="280" y="-200" width="140" height="200" fill="#5599ff" fill-opacity="0.5" stroke="#0066cc" stroke-width="2"/>
+    <text x="350" y="-210" text-anchor="middle" class="energy-label">Potential Barrier (V₀)</text>
+    
+    <!-- Energy level -->
+    <line x1="0" y1="-100" x2="700" y2="-100" stroke="#cc0000" stroke-width="2" stroke-dasharray="5,5"/>
+    <text x="680" y="-90" text-anchor="end" class="energy-label">Electron Energy (E)</text>
+    
+    <!-- Wave function - Region I: Incident wave -->
+    <g id="incident">
+      <path d="M 0,-100 Q 20,-50 40,-100 Q 60,-150 80,-100 Q 100,-50 120,-100 Q 140,-150 160,-100 Q 180,-50 200,-100 Q 220,-150 240,-100 Q 260,-50 280,-100" 
+            fill="none" stroke="#009900" stroke-width="3"/>
+    </g>
+    
+    <!-- Wave function - Region II: Inside barrier (exponentially decaying) -->
+    <g id="barrier-wave">
+      <path d="M 280,-100 Q 290,-80 300,-100 Q 310,-120 320,-100 Q 330,-80 340,-100 Q 350,-120 360,-100 Q 370,-80 380,-100 Q 390,-120 400,-100 Q 410,-80 420,-100" 
+            fill="none" stroke="#009900" stroke-width="3" stroke-opacity="0.7" transform="scale(1,0.5)"/>
+    </g>
+    
+    <!-- Wave function - Region III: Transmitted wave (reduced amplitude) -->
+    <g id="transmitted">
+      <path d="M 420,-100 Q 440,-85 460,-100 Q 480,-115 500,-100 Q 520,-85 540,-100 Q 560,-115 580,-100 Q 600,-85 620,-100 Q 640,-115 660,-100 Q 680,-85 700,-100" 
+            fill="none" stroke="#009900" stroke-width="3" stroke-opacity="0.5" transform="scale(1,0.3)"/>
+    </g>
+    
+    <!-- Tunneling probability -->
+    <g class="equation">
+      <text x="350" y="-240" text-anchor="middle" class="formula">T ≈ exp(-2κL)</text>
+      <text x="350" y="-260" text-anchor="middle" class="formula">κ = √(2m(V₀-E)/ħ²)</text>
+    </g>
+    
+    <!-- Labels for regions -->
+    <text x="140" y="20" text-anchor="middle">Region I: Incident wave</text>
+    <text x="350" y="20" text-anchor="middle">Region II: Barrier</text>
+    <text x="560" y="20" text-anchor="middle">Region III: Transmitted wave</text>
+    
+    <!-- Fuel cell elements -->
+    <text x="100" y="-260" fill="#555555">Anode</text>
+    <text x="600" y="-260" fill="#555555">Cathode</text>
+    <text x="350" y="-295" fill="#555555">Proton Exchange Membrane</text>
+    
+    <!-- H₂/O₂ indicators -->
+    <text x="100" y="-280" fill="#555555">H₂</text>
+    <text x="600" y="-280" fill="#555555">O₂</text>
+    
+    <!-- Arrows showing electron direction -->
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+              refX="0" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#009900"/>
+      </marker>
+    </defs>
+    <line x1="200" y1="-50" x2="240" y2="-50" stroke="#009900" stroke-width="2" 
+          marker-end="url(#arrowhead)"/>
+    <line x1="460" y1="-50" x2="500" y2="-50" stroke="#009900" stroke-width="2" 
+          marker-end="url(#arrowhead)"/>
+    <text x="220" y="-30" fill="#009900" text-anchor="middle">Electron</text>
+    <text x="480" y="-30" fill="#009900" text-anchor="middle">Tunneled</text>
+  </g>
+</svg>
